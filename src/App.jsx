@@ -12,7 +12,8 @@ function App() {
     const [projects,setProjects] = useState
     ({
         selectedProjectId : undefined, // ud -> noProject , null->AddProject ,id->activeProject
-        PROJECTS :[]
+        PROJECTS :[],
+        tasks : []
     })
     function addNewProject (){
         setProjects(oldProjects =>({
@@ -24,19 +25,48 @@ function App() {
         const id = Math.random();
         projectData.pid = id;
        setProjects(oldProjects =>({
+           ...oldProjects,
            selectedProjectId: undefined,
-           PROJECTS: [...oldProjects.PROJECTS,projectData]
+           PROJECTS: [...oldProjects.PROJECTS,projectData],
        }))
     }
     function showProject (id){
         setProjects((currProjects)=>({...currProjects,selectedProjectId: id}))
     }
 
+    function handleDelete () {
+        setProjects((currProjects)=>{
+            return {
+                ...currProjects,
+                PROJECTS: currProjects.PROJECTS.filter(e => e.pid !== currProjects.selectedProjectId),
+                selectedProjectId: undefined
+            }
+        })
+    }
+
+    function addTask(task){
+        setProjects(oldProjects =>({
+            ...oldProjects,
+            tasks: [...oldProjects.tasks,task]
+        }))
+    }
+    function handleTaskDelete(id){
+        setProjects(currProjects =>{
+            return {
+                ...currProjects,
+                tasks: currProjects.tasks.filter(t => t.tId !== id)
+            }
+        })
+    }
+    function handleCancle (){
+        setProjects(currProjects => ({...currProjects,selectedProjectId: undefined}))
+    }
+
   return (
     <main className="h-screen my-8 flex gap-8">
         <SideBar PROJECTS={projects.PROJECTS} addProject={addNewProject} showProject={showProject} activeProjectId={projects.selectedProjectId}  />
-        {projects.selectedProjectId === null && <AddProject addNewProject={handleNewProject} />}
-        {projects.selectedProjectId && <ProjectShow PROJECTS={projects.PROJECTS} id={projects.selectedProjectId} />}
+        {projects.selectedProjectId === null && <AddProject onCancle={handleCancle} addNewProject={handleNewProject} />}
+        {projects.selectedProjectId && <ProjectShow onTaskDelete={handleTaskDelete} allTasks={projects.tasks} onAdd={addTask}  onDelete={handleDelete} PROJECTS={projects.PROJECTS} id={projects.selectedProjectId} />}
         {projects.selectedProjectId === undefined && <NoProject addProject={addNewProject}/>}
 
     </main>
